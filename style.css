@@ -310,28 +310,31 @@ header h1 { margin: 0 0 4px; font-size: 25px; }
 .header-actions { display: flex; align-items: center; gap: 10px; }
 .profile-bar { display: flex; align-items: center; gap: 4px; }
 .profile-bar select {
-  padding: 6px 8px;
+  height: 38px;
+  padding: 0 8px;
   background: var(--panel);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 15px;
   max-width: 180px;
   cursor: pointer;
 }
 .reset-btn {
+  height: 38px;
   background: var(--panel);
   color: var(--muted);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 7px 15px;
-  font-size: 14px;
+  padding: 0 13px;
+  font-size: 15px;
   cursor: pointer;
 }
 .reset-btn:hover { color: var(--danger); border-color: var(--danger); }
 
 .lang-switch {
   display: flex;
+  height: 38px;
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
@@ -340,7 +343,7 @@ header h1 { margin: 0 0 4px; font-size: 25px; }
   background: var(--panel);
   color: var(--muted);
   border: none;
-  padding: 6px 18px;
+  padding: 0 18px;
   font-size: 16px;
   cursor: pointer;
 }
