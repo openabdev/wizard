@@ -52,6 +52,82 @@ function defaultValue(f) {
   }
 }
 
+// ---------------------------------------------------------------- profile persistence
+
+const PROFILE_KEY = "oab-wizard-profile-v1";
+
+function saveProfile() {
+  try {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify({
+      botName: state.botName,
+      deployTarget: state.deployTarget,
+      secretRefs: state.secretRefs,
+      agent: state.agent,
+      pool: state.pool,
+      platforms: state.platforms,
+    }));
+  } catch { /* storage full/blocked — persist is best-effort */ }
+}
+
+// Merge a saved profile into freshly-initialized state; validates against the
+// current schema so stale profiles survive schema evolution.
+function loadProfile() {
+  let p;
+  try {
+    p = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null");
+  } catch { return; }
+  if (!p || typeof p !== "object") return;
+
+  if (typeof p.botName === "string") state.botName = p.botName;
+  if (SCHEMA.deployTargets.some((t) => t.id === p.deployTarget)) state.deployTarget = p.deployTarget;
+  if (Array.isArray(p.secretRefs)) {
+    state.secretRefs = p.secretRefs.filter((r) =>
+      r && typeof r.name === "string" && typeof r.source === "string" &&
+      (r.source.startsWith("aws-sm://") || r.source.startsWith("exec://")));
+  }
+  if (p.agent && typeof p.agent === "object") {
+    if (SCHEMA.agents.some((a) => a.id === p.agent.preset)) state.agent.preset = p.agent.preset;
+    for (const k of ["command", "args", "working_dir"]) {
+      if (typeof p.agent[k] === "string") state.agent[k] = p.agent[k];
+    }
+    if (Array.isArray(p.agent.env)) {
+      state.agent.env = p.agent.env.filter((r) =>
+        r && typeof r.key === "string" && typeof r.value === "string");
+    }
+  }
+  if (p.pool && typeof p.pool === "object") {
+    for (const f of SCHEMA.pool) {
+      if (typeof p.pool[f.key] === "number") state.pool[f.key] = p.pool[f.key];
+    }
+  }
+  if (p.platforms && typeof p.platforms === "object") {
+    for (const sec of SECTIONS) {
+      const saved = p.platforms[sec.id];
+      if (!saved || typeof saved !== "object") continue;
+      const dst = state.platforms[sec.id];
+      dst.enabled = !!saved.enabled;
+      for (const f of sec.fields) {
+        const sv = saved.values?.[f.key];
+        if (sv === undefined) continue;
+        if (f.type === "secret") {
+          if (sv && typeof sv === "object") {
+            dst.values[f.key] = {
+              use: !!sv.use,
+              mode: sv.mode === "ref" ? "ref" : "env",
+              env: typeof sv.env === "string" && sv.env ? sv.env : f.env,
+              ref: typeof sv.ref === "string" ? sv.ref : null,
+            };
+          }
+        } else if (f.type === "list") {
+          if (Array.isArray(sv)) dst.values[f.key] = sv.filter((x) => typeof x === "string");
+        } else if (typeof sv === typeof defaultValue(f)) {
+          dst.values[f.key] = sv;
+        }
+      }
+    }
+  }
+}
+
 // ---------------------------------------------------------------- i18n helpers
 
 function T(s) {
@@ -484,6 +560,7 @@ function renderChrome() {
   }
   document.getElementById("copy-btn").textContent = S("copy");
   document.getElementById("download-btn").textContent = S("download");
+  document.getElementById("reset-btn").textContent = S("reset");
   document.documentElement.lang = state.lang === "zh" ? "zh-Hant" : "en";
 }
 
@@ -995,6 +1072,7 @@ function refresh() {
   const label = state.deployTarget === "ecsctl" ? "aws-sm"
     : state.deployTarget === "docker" ? "docker env" : "k8s secret";
   document.getElementById("secrets-tab-btn").textContent = `secrets (${label})`;
+  saveProfile(); // every UI mutation ends in refresh() — persist here
 }
 
 function setLang(lang) {
@@ -1023,6 +1101,12 @@ function setupTabs() {
     if (btn) setLang(btn.dataset.lang);
   });
 
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    if (!confirm(S("resetConfirm"))) return;
+    localStorage.removeItem(PROFILE_KEY);
+    location.reload();
+  });
+
   document.getElementById("copy-btn").addEventListener("click", async (e) => {
     await navigator.clipboard.writeText(currentContent());
     e.target.textContent = S("copied");
@@ -1040,6 +1124,7 @@ function setupTabs() {
 
 // ---------------------------------------------------------------- boot
 
+loadProfile();
 renderChrome();
 renderForm();
 setupTabs();

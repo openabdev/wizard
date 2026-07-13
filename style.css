@@ -18,15 +18,15 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 19px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font: 18px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
 header { padding: 20px 28px 8px; }
-header h1 { margin: 0 0 4px; font-size: 26px; }
-.tagline { margin: 0; color: var(--muted); font-size: 17px; max-width: 72ch; }
+header h1 { margin: 0 0 4px; font-size: 25px; }
+.tagline { margin: 0; color: var(--muted); font-size: 16px; max-width: 72ch; }
 .tagline code { color: var(--green); }
 .tagline strong { color: var(--text); }
 
@@ -62,7 +62,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   gap: 8px;
   padding: 10px 18px;
   font-weight: 600;
-  font-size: 18px;
+  font-size: 17px;
   cursor: pointer;
   user-select: none;
   background: var(--panel);
@@ -70,11 +70,11 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
 .section-head:hover { background: var(--panel2); }
 .section-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .section.open > .section-head { border-bottom: 1px solid var(--border); background: var(--panel2); }
-.chev { color: var(--muted); font-size: 16px; width: 16px; }
+.chev { color: var(--muted); font-size: 15px; width: 16px; }
 .section-title.off { color: var(--muted); font-weight: 500; }
 .count-badge {
   margin-left: auto;
-  font: 15px var(--mono);
+  font: 14px var(--mono);
   color: var(--muted);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -87,7 +87,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
 .field { margin: 10px 0; }
 .field > label {
   display: block;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 500;
   margin-bottom: 4px;
   color: var(--text);
@@ -101,24 +101,24 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
-  font-size: 18px;
+  font-size: 17px;
 }
 .field input:focus, .field select:focus {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
 }
 
-.help { margin: 4px 0 0; font-size: 16px; color: var(--muted); }
+.help { margin: 4px 0 0; font-size: 15px; color: var(--muted); }
 
 .toggle { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
-.toggle.small { font-size: 16px; color: var(--muted); }
+.toggle.small { font-size: 15px; color: var(--muted); }
 
 .radio-row { display: flex; gap: 18px; flex-wrap: wrap; }
-.radio { display: inline-flex; align-items: center; gap: 5px; font-size: 17px; cursor: pointer; }
+.radio { display: inline-flex; align-items: center; gap: 5px; font-size: 16px; cursor: pointer; }
 
 /* ---- secret refs palette + drop zones ---- */
 
-.env-prefix { color: var(--muted); font-family: var(--mono); font-size: 17px; }
+.env-prefix { color: var(--muted); font-family: var(--mono); font-size: 16px; }
 
 .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 
@@ -128,7 +128,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   gap: 6px;
   background: #e8effc;
   border: 1px solid var(--accent);
-  font: 17px var(--mono);
+  font: 16px var(--mono);
   border-radius: 18px;
   padding: 3px 6px 3px 16px;
   cursor: grab;
@@ -143,7 +143,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
 .chip-eq { color: var(--muted); }
 .chip-src {
   color: var(--muted);
-  font-size: 15px;
+  font-size: 14px;
   max-width: 260px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -154,7 +154,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1;
   cursor: pointer;
   padding: 2px 5px;
@@ -168,7 +168,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   background: var(--panel2);
   border: 1px solid var(--border);
   border-radius: 6px;
-  font: 17px var(--mono);
+  font: 16px var(--mono);
 }
 .ref-add input.ref-input.name { width: 150px; color: var(--amber); }
 .ref-add input.ref-input.src { flex: 1; min-width: 220px; color: var(--green); }
@@ -178,7 +178,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 15px;
   padding: 5px 18px;
   cursor: pointer;
 }
@@ -201,7 +201,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
 }
 .dropzone.dragover { border-color: var(--green); background: #0e7a521a; }
 .dropzone.filled { border-style: solid; }
-.drop-hint { color: var(--muted); font-size: 16px; font-style: italic; }
+.drop-hint { color: var(--muted); font-size: 15px; font-style: italic; }
 
 .zone-actions {
   margin-left: auto;
@@ -216,7 +216,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   background: none;
   border: 1px solid transparent;
   color: var(--muted);
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1;
   cursor: pointer;
   padding: 4px 7px;
@@ -236,7 +236,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   color: var(--amber);
   border: 1px solid var(--border);
   border-radius: 6px;
-  font: 16px var(--mono);
+  font: 15px var(--mono);
 }
 .env-row input.env-val {
   flex: 1;
@@ -245,7 +245,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   color: var(--green);
   border: 1px solid var(--border);
   border-radius: 6px;
-  font: 16px var(--mono);
+  font: 15px var(--mono);
 }
 .env-row input.env-val.dragover { border-color: var(--green); background: #0e7a521a; }
 .env-row .env-ref-pick {
@@ -255,7 +255,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
 }
 .env-row .icon-btn {
@@ -272,13 +272,13 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
-  font: 16px var(--mono);
+  font: 15px var(--mono);
   cursor: pointer;
 }
 .ref-picker:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 
 .badge.required {
-  font-size: 15px;
+  font-size: 14px;
   color: #b45309;
   border: 1px solid #b4530966;
   border-radius: 10px;
@@ -286,10 +286,10 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   margin-left: 8px;
   white-space: nowrap;
 }
-.lock { font-size: 16px; }
+.lock { font-size: 15px; }
 
 .key-hint {
-  font: 15px var(--mono);
+  font: 14px var(--mono);
   color: var(--muted);
   background: var(--panel2);
   border: 1px solid var(--border);
@@ -307,6 +307,18 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   justify-content: space-between;
   gap: 19px;
 }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.reset-btn {
+  background: var(--panel);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 15px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.reset-btn:hover { color: var(--danger); border-color: var(--danger); }
+
 .lang-switch {
   display: flex;
   border: 1px solid var(--border);
@@ -318,7 +330,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   color: var(--muted);
   border: none;
   padding: 6px 18px;
-  font-size: 17px;
+  font-size: 16px;
   cursor: pointer;
 }
 .lang-btn.active {
@@ -346,7 +358,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   border: 1px solid transparent;
   border-bottom: none;
   color: var(--muted);
-  font: 17px var(--mono);
+  font: 16px var(--mono);
   padding: 7px 18px;
   border-radius: 8px 8px 0 0;
   cursor: pointer;
@@ -369,7 +381,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 15px;
   padding: 5px 16px;
   cursor: pointer;
 }
@@ -384,7 +396,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   border-radius: 0 0 10px 10px;
 }
 #preview code {
-  font: 17px/1.6 var(--mono);
+  font: 16px/1.6 var(--mono);
   color: var(--text);
   white-space: pre;
 }
@@ -401,7 +413,7 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
 footer {
   padding: 8px 28px 19px;
   color: var(--muted);
-  font-size: 16px;
+  font-size: 15px;
 }
 footer a { color: var(--accent); }
 
