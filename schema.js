@@ -214,7 +214,7 @@ const UI_STRINGS = {
     tagline_5: " references only.",
     general: "Basics",
     botName: "What should we call this bot?",
-    botNameHelp: "Used to name generated resources (secrets, containers).",
+    botNameHelp: "Also the profile name — used to name generated resources (secrets, containers).",
     deployTarget: "Where will this bot run?",
     agent: "Agent",
     agentBackend: "Which coding agent powers this bot?",
@@ -246,6 +246,7 @@ const UI_STRINGS = {
     insertRef: "Insert a secret ref",
     profileNamePrompt: "New profile name (e.g. the bot's name):",
     deleteProfileConfirm: "Delete profile \"{name}\"? This cannot be undone.",
+    overwriteProfileConfirm: "A profile named \"{name}\" already exists. Overwrite it?",
   },
   zh: {
     title: "OpenAB 設定精靈",
@@ -256,7 +257,7 @@ const UI_STRINGS = {
     tagline_5: " 參照。",
     general: "基本設定",
     botName: "這個 bot 要叫什麼名字？",
-    botNameHelp: "用於命名產生的資源（secrets、容器）。",
+    botNameHelp: "同時是設定檔名稱 — 用於命名產生的資源（secrets、容器）。",
     deployTarget: "這個 bot 會在哪裡執行？",
     agent: "代理",
     agentBackend: "由哪個 coding agent 驅動這個 bot？",
@@ -288,5 +289,6 @@ const UI_STRINGS = {
     insertRef: "插入密鑰參照",
     profileNamePrompt: "新設定檔名稱（例如 bot 的名字）：",
     deleteProfileConfirm: "刪除設定檔「{name}」？此操作無法復原。",
+    overwriteProfileConfirm: "已存在名為「{name}」的設定檔，要覆蓋它嗎？",
   },
 };

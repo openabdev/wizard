@@ -68,7 +68,8 @@ function defaultValue(f) {
 
 const PROFILES_KEY = "oab-wizard-profiles-v1";
 const LEGACY_PROFILE_KEY = "oab-wizard-profile-v1";
-let activeProfile = "default";
+// profile name === bot name (kept in sync by renameProfile)
+let activeProfile = "my-openab-bot";
 
 function readStore() {
   try {
@@ -162,12 +163,13 @@ function applyProfile(p) {
 
 function loadActiveProfile() {
   let s = readStore();
-  // migrate the pre-multi-profile single snapshot
+  // migrate the pre-multi-profile single snapshot, keyed by its bot name
   if (!s) {
     try {
       const legacy = JSON.parse(localStorage.getItem(LEGACY_PROFILE_KEY) || "null");
       if (legacy && typeof legacy === "object") {
-        s = { activeProfile: "default", profiles: { default: legacy } };
+        const name = typeof legacy.botName === "string" && legacy.botName ? legacy.botName : "my-openab-bot";
+        s = { activeProfile: name, profiles: { [name]: legacy } };
         writeStore(s);
         localStorage.removeItem(LEGACY_PROFILE_KEY);
       }
@@ -178,6 +180,32 @@ function loadActiveProfile() {
   if (names.length === 0) return;
   activeProfile = names.includes(s.activeProfile) ? s.activeProfile : names[0];
   applyProfile(s.profiles[activeProfile]);
+  state.botName = activeProfile; // profile name is authoritative
+}
+
+// bot name and profile name are the same thing — renaming the bot
+// (on blur/Enter) renames its profile in the store
+function renameProfile(rawName) {
+  const newName = rawName.trim();
+  if (!newName || newName === activeProfile) {
+    state.botName = activeProfile;
+    renderForm(); refresh();
+    return;
+  }
+  const s = readStore() || { activeProfile, profiles: {} };
+  if (s.profiles[newName] &&
+      !confirm(S("overwriteProfileConfirm").replace("{name}", newName))) {
+    state.botName = activeProfile; // declined — revert
+    renderForm(); refresh();
+    return;
+  }
+  delete s.profiles[activeProfile];
+  activeProfile = newName;
+  state.botName = newName;
+  s.profiles[newName] = snapshot();
+  s.activeProfile = newName;
+  writeStore(s);
+  renderChrome(); renderForm(); refresh();
 }
 
 function switchProfile(name) {
@@ -187,18 +215,22 @@ function switchProfile(name) {
   resetStateDefaults();
   const s = readStore();
   applyProfile(s?.profiles?.[name]);
+  state.botName = name; // profile name is authoritative
   saveProfile();
   renderChrome(); renderForm(); refresh();
 }
 
 function newProfile() {
-  const name = (prompt(S("profileNamePrompt"), state.botName) || "").trim();
+  // suggest a unique bot name
+  let cand = "my-openab-bot", i = 2;
+  while (profileNames().includes(cand) || cand === activeProfile) cand = `my-openab-bot-${i++}`;
+  const name = (prompt(S("profileNamePrompt"), cand) || "").trim();
   if (!name) return;
   if (profileNames().includes(name)) { switchProfile(name); return; }
   saveProfile();
   activeProfile = name;
   resetStateDefaults();
-  state.botName = name; // sensible starting bot name
+  state.botName = name; // bot name = profile name
   saveProfile();
   renderChrome(); renderForm(); refresh();
 }
@@ -208,11 +240,12 @@ function deleteProfile() {
   const s = readStore() || { activeProfile, profiles: {} };
   delete s.profiles[activeProfile];
   const rest = Object.keys(s.profiles);
-  activeProfile = rest[0] || "default";
+  resetStateDefaults();
+  activeProfile = rest[0] || state.botName;
   s.activeProfile = activeProfile;
   writeStore(s);
-  resetStateDefaults();
   applyProfile(s.profiles[activeProfile]);
+  state.botName = activeProfile;
   saveProfile();
   renderChrome(); renderForm(); refresh();
 }
@@ -785,6 +818,7 @@ function renderForm() {
         el("input", {
           type: "text", value: state.botName,
           oninput: (e) => { state.botName = e.target.value.trim(); refresh(); },
+          onchange: (e) => renameProfile(e.target.value), // sync profile name on commit
         }),
         el("p", { class: "help" }, S("botNameHelp")),
       ),
