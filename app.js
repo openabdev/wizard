@@ -529,12 +529,12 @@ function renderSecretPalette() {
   );
 
   const nameInput = el("input", {
-    type: "text", class: "ref-input name", placeholder: "sec_ref_name",
+    type: "text", class: "ref-input name", placeholder: "github_token",
     spellcheck: "false",
     onkeydown: (e) => { if (e.key === "Enter") addRef(); },
   });
   const srcInput = el("input", {
-    type: "text", class: "ref-input src", placeholder: "aws-sm://secret-id#json-key",
+    type: "text", class: "ref-input src", placeholder: "aws-sm://oab#GITHUB_TOKEN",
     spellcheck: "false",
     oninput: (e) => e.target.classList.remove("invalid"),
     onkeydown: (e) => { if (e.key === "Enter") addRef(); },
