@@ -192,7 +192,7 @@ function switchProfile(name) {
 }
 
 function newProfile() {
-  const name = (prompt(S("profileNamePrompt")) || "").trim();
+  const name = (prompt(S("profileNamePrompt"), state.botName) || "").trim();
   if (!name) return;
   if (profileNames().includes(name)) { switchProfile(name); return; }
   saveProfile();
