@@ -939,13 +939,18 @@ function tokString(raw) {
 // non-string value fragment: booleans, numbers, inline-table keys, trailing comments
 function tokPlain(raw) {
   const hash = raw.indexOf("#");
-  let code = hash >= 0 ? raw.slice(0, hash) : raw;
+  const code = hash >= 0 ? raw.slice(0, hash) : raw;
   const comment = hash >= 0 ? `<span class="tok-comment">${escapeHtml(raw.slice(hash))}</span>` : "";
-  code = escapeHtml(code)
-    .replace(/\b(true|false)\b/g, '<span class="tok-bool">$1</span>')
-    .replace(/(?<![\w"])(\d+)(?![\w"])/g, '<span class="tok-num">$1</span>')
-    .replace(/([A-Za-z_][A-Za-z0-9_]*)(\s*=)/g, '<span class="tok-key">$1</span>$2');
-  return code + comment;
+  // single pass — emitted spans are never re-scanned
+  const highlighted = escapeHtml(code).replace(
+    /\b(?:true|false)\b|\b\d+\b|[A-Za-z_][A-Za-z0-9_]*(?=\s*=)/g,
+    (m) => {
+      if (m === "true" || m === "false") return `<span class="tok-bool">${m}</span>`;
+      if (/^\d+$/.test(m)) return `<span class="tok-num">${m}</span>`;
+      return `<span class="tok-key">${m}</span>`;
+    },
+  );
+  return highlighted + comment;
 }
 
 function tokValue(s) {
