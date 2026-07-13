@@ -20,7 +20,7 @@
 // ---------------------------------------------------------------- state
 
 const state = {
-  lang: localStorage.getItem("oab-wizard-lang") || "en",
+  lang: localStorage.getItem("oab-wizard-lang") || "zh",
   botName: "my-openab-bot",
   platforms: {}, // id -> { enabled: bool, values: { key -> value } }
   agent: { preset: "default", command: "", args: "", working_dir: "", env: [] },
@@ -579,8 +579,8 @@ function renderSecretPalette() {
   );
 }
 
-// accordion: id of the single expanded section
-let expandedSection = "general";
+// accordion: id of the single expanded section (null = all collapsed)
+let expandedSection = null;
 
 function accordion(id, titleNodes, body) {
   const open = expandedSection === id;
