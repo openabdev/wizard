@@ -33,12 +33,22 @@ const state = {
 // platforms + feature sections (e.g. [stt]) share the same machinery
 const SECTIONS = [...SCHEMA.platforms, ...(SCHEMA.features || [])];
 
-for (const p of SECTIONS) {
-  const values = {};
-  for (const f of p.fields) values[f.key] = defaultValue(f);
-  state.platforms[p.id] = { enabled: p.id === "discord", values };
+// (re)initialize everything except lang to factory defaults
+function resetStateDefaults() {
+  state.botName = "my-openab-bot";
+  state.deployTarget = "k8s";
+  state.secretRefs = [];
+  state.agent = { preset: "default", command: "", args: "", working_dir: "", env: [] };
+  state.pool = {};
+  for (const f of SCHEMA.pool) state.pool[f.key] = f.default;
+  state.platforms = {};
+  for (const p of SECTIONS) {
+    const values = {};
+    for (const f of p.fields) values[f.key] = defaultValue(f);
+    state.platforms[p.id] = { enabled: p.id === "discord", values };
+  }
 }
-for (const f of SCHEMA.pool) state.pool[f.key] = f.default;
+resetStateDefaults();
 
 function defaultValue(f) {
   switch (f.type) {
@@ -53,29 +63,51 @@ function defaultValue(f) {
 }
 
 // ---------------------------------------------------------------- profile persistence
+// Multiple named profiles (one per bot) live in localStorage:
+//   { activeProfile: "name", profiles: { name: <snapshot> } }
 
-const PROFILE_KEY = "oab-wizard-profile-v1";
+const PROFILES_KEY = "oab-wizard-profiles-v1";
+const LEGACY_PROFILE_KEY = "oab-wizard-profile-v1";
+let activeProfile = "default";
 
-function saveProfile() {
+function readStore() {
   try {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify({
-      botName: state.botName,
-      deployTarget: state.deployTarget,
-      secretRefs: state.secretRefs,
-      agent: state.agent,
-      pool: state.pool,
-      platforms: state.platforms,
-    }));
-  } catch { /* storage full/blocked — persist is best-effort */ }
+    const s = JSON.parse(localStorage.getItem(PROFILES_KEY) || "null");
+    if (s && typeof s === "object" && s.profiles && typeof s.profiles === "object") return s;
+  } catch { /* corrupt store — treat as absent */ }
+  return null;
 }
 
-// Merge a saved profile into freshly-initialized state; validates against the
+function writeStore(s) {
+  try { localStorage.setItem(PROFILES_KEY, JSON.stringify(s)); } catch { /* best-effort */ }
+}
+
+function snapshot() {
+  return {
+    botName: state.botName,
+    deployTarget: state.deployTarget,
+    secretRefs: state.secretRefs,
+    agent: state.agent,
+    pool: state.pool,
+    platforms: state.platforms,
+  };
+}
+
+function profileNames() {
+  const s = readStore();
+  return s ? Object.keys(s.profiles) : [];
+}
+
+function saveProfile() {
+  const s = readStore() || { activeProfile, profiles: {} };
+  s.profiles[activeProfile] = snapshot();
+  s.activeProfile = activeProfile;
+  writeStore(s);
+}
+
+// Merge a saved snapshot into freshly-initialized state; validates against the
 // current schema so stale profiles survive schema evolution.
-function loadProfile() {
-  let p;
-  try {
-    p = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null");
-  } catch { return; }
+function applyProfile(p) {
   if (!p || typeof p !== "object") return;
 
   if (typeof p.botName === "string") state.botName = p.botName;
@@ -126,6 +158,63 @@ function loadProfile() {
       }
     }
   }
+}
+
+function loadActiveProfile() {
+  let s = readStore();
+  // migrate the pre-multi-profile single snapshot
+  if (!s) {
+    try {
+      const legacy = JSON.parse(localStorage.getItem(LEGACY_PROFILE_KEY) || "null");
+      if (legacy && typeof legacy === "object") {
+        s = { activeProfile: "default", profiles: { default: legacy } };
+        writeStore(s);
+        localStorage.removeItem(LEGACY_PROFILE_KEY);
+      }
+    } catch { /* ignore */ }
+  }
+  if (!s) return;
+  const names = Object.keys(s.profiles);
+  if (names.length === 0) return;
+  activeProfile = names.includes(s.activeProfile) ? s.activeProfile : names[0];
+  applyProfile(s.profiles[activeProfile]);
+}
+
+function switchProfile(name) {
+  if (name === activeProfile) return;
+  saveProfile();
+  activeProfile = name;
+  resetStateDefaults();
+  const s = readStore();
+  applyProfile(s?.profiles?.[name]);
+  saveProfile();
+  renderChrome(); renderForm(); refresh();
+}
+
+function newProfile() {
+  const name = (prompt(S("profileNamePrompt")) || "").trim();
+  if (!name) return;
+  if (profileNames().includes(name)) { switchProfile(name); return; }
+  saveProfile();
+  activeProfile = name;
+  resetStateDefaults();
+  state.botName = name; // sensible starting bot name
+  saveProfile();
+  renderChrome(); renderForm(); refresh();
+}
+
+function deleteProfile() {
+  if (!confirm(S("deleteProfileConfirm").replace("{name}", activeProfile))) return;
+  const s = readStore() || { activeProfile, profiles: {} };
+  delete s.profiles[activeProfile];
+  const rest = Object.keys(s.profiles);
+  activeProfile = rest[0] || "default";
+  s.activeProfile = activeProfile;
+  writeStore(s);
+  resetStateDefaults();
+  applyProfile(s.profiles[activeProfile]);
+  saveProfile();
+  renderChrome(); renderForm(); refresh();
 }
 
 // ---------------------------------------------------------------- i18n helpers
@@ -560,7 +649,13 @@ function renderChrome() {
   }
   document.getElementById("copy-btn").textContent = S("copy");
   document.getElementById("download-btn").textContent = S("download");
-  document.getElementById("reset-btn").textContent = S("reset");
+  // profile selector: all saved profiles + the active (possibly unsaved) one
+  const sel = document.getElementById("profile-select");
+  sel.textContent = "";
+  const names = new Set([...profileNames(), activeProfile]);
+  for (const n of names) {
+    sel.append(el("option", { value: n, ...(n === activeProfile ? { selected: "" } : {}) }, n));
+  }
   document.documentElement.lang = state.lang === "zh" ? "zh-Hant" : "en";
 }
 
@@ -1101,11 +1196,11 @@ function setupTabs() {
     if (btn) setLang(btn.dataset.lang);
   });
 
-  document.getElementById("reset-btn").addEventListener("click", () => {
-    if (!confirm(S("resetConfirm"))) return;
-    localStorage.removeItem(PROFILE_KEY);
-    location.reload();
+  document.getElementById("profile-select").addEventListener("change", (e) => {
+    switchProfile(e.target.value);
   });
+  document.getElementById("profile-new").addEventListener("click", newProfile);
+  document.getElementById("profile-del").addEventListener("click", deleteProfile);
 
   document.getElementById("copy-btn").addEventListener("click", async (e) => {
     await navigator.clipboard.writeText(currentContent());
@@ -1124,7 +1219,7 @@ function setupTabs() {
 
 // ---------------------------------------------------------------- boot
 
-loadProfile();
+loadActiveProfile();
 renderChrome();
 renderForm();
 setupTabs();

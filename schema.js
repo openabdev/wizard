@@ -244,8 +244,8 @@ const UI_STRINGS = {
     addEntry: "+ Add a new entry",
     cancel: "Cancel",
     insertRef: "Insert a secret ref",
-    reset: "Reset",
-    resetConfirm: "Clear the saved profile and start over?",
+    profileNamePrompt: "New profile name (e.g. the bot's name):",
+    deleteProfileConfirm: "Delete profile \"{name}\"? This cannot be undone.",
   },
   zh: {
     title: "OpenAB 設定精靈",
@@ -286,7 +286,7 @@ const UI_STRINGS = {
     addEntry: "+ 新增項目",
     cancel: "取消",
     insertRef: "插入密鑰參照",
-    reset: "重設",
-    resetConfirm: "清除已儲存的設定檔並重新開始？",
+    profileNamePrompt: "新設定檔名稱（例如 bot 的名字）：",
+    deleteProfileConfirm: "刪除設定檔「{name}」？此操作無法復原。",
   },
 };

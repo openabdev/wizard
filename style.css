@@ -308,6 +308,17 @@ header h1 { margin: 0 0 4px; font-size: 25px; }
   gap: 19px;
 }
 .header-actions { display: flex; align-items: center; gap: 10px; }
+.profile-bar { display: flex; align-items: center; gap: 4px; }
+.profile-bar select {
+  padding: 6px 8px;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  max-width: 180px;
+  cursor: pointer;
+}
 .reset-btn {
   background: var(--panel);
   color: var(--muted);
