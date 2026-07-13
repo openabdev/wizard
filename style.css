@@ -389,6 +389,15 @@ header h1 { margin: 0 0 4px; font-size: 26px; }
   white-space: pre;
 }
 
+/* TOML syntax tokens (light theme) */
+.tok-comment { color: #8a919c; font-style: italic; }
+.tok-section { color: #7c3aed; font-weight: 600; }
+.tok-key { color: #0550ae; }
+.tok-string { color: var(--green); }
+.tok-interp { color: var(--amber); font-weight: 600; }
+.tok-bool { color: #cf222e; }
+.tok-num { color: #b35900; }
+
 footer {
   padding: 8px 28px 19px;
   color: var(--muted);

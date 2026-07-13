@@ -924,8 +924,69 @@ function currentContent() {
   return generateRun();
 }
 
+// ---------------------------------------------------------------- syntax highlighting
+
+function escapeHtml(s) {
+  return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+}
+
+// strings, with ${...} interpolations highlighted inside
+function tokString(raw) {
+  const inner = escapeHtml(raw).replace(/\$\{[^}]*\}/g, (m) => `<span class="tok-interp">${m}</span>`);
+  return `<span class="tok-string">${inner}</span>`;
+}
+
+// non-string value fragment: booleans, numbers, inline-table keys, trailing comments
+function tokPlain(raw) {
+  const hash = raw.indexOf("#");
+  let code = hash >= 0 ? raw.slice(0, hash) : raw;
+  const comment = hash >= 0 ? `<span class="tok-comment">${escapeHtml(raw.slice(hash))}</span>` : "";
+  code = escapeHtml(code)
+    .replace(/\b(true|false)\b/g, '<span class="tok-bool">$1</span>')
+    .replace(/(?<![\w"])(\d+)(?![\w"])/g, '<span class="tok-num">$1</span>')
+    .replace(/([A-Za-z_][A-Za-z0-9_]*)(\s*=)/g, '<span class="tok-key">$1</span>$2');
+  return code + comment;
+}
+
+function tokValue(s) {
+  let out = "", last = 0;
+  const re = /"[^"]*"/g;
+  let m;
+  while ((m = re.exec(s))) {
+    out += tokPlain(s.slice(last, m.index));
+    out += tokString(m[0]);
+    last = m.index + m[0].length;
+  }
+  return out + tokPlain(s.slice(last));
+}
+
+function highlightToml(src) {
+  return src.split("\n").map((line) => {
+    if (/^\s*#/.test(line)) return `<span class="tok-comment">${escapeHtml(line)}</span>`;
+    if (/^\s*\[[^\]]*\]\s*$/.test(line)) return `<span class="tok-section">${escapeHtml(line)}</span>`;
+    const kv = line.match(/^(\s*)([A-Za-z0-9_.-]+)(\s*=\s*)(.*)$/);
+    if (kv) {
+      return escapeHtml(kv[1])
+        + `<span class="tok-key">${escapeHtml(kv[2])}</span>`
+        + escapeHtml(kv[3])
+        + tokValue(kv[4]);
+    }
+    return escapeHtml(line);
+  }).join("\n");
+}
+
+// lighter treatment for shell/yaml tabs: comments + strings only
+function highlightPlain(src) {
+  return src.split("\n").map((line) => {
+    if (/^\s*#/.test(line)) return `<span class="tok-comment">${escapeHtml(line)}</span>`;
+    return tokValue(line);
+  }).join("\n");
+}
+
 function refresh() {
-  document.querySelector("#preview code").textContent = currentContent();
+  const code = document.querySelector("#preview code");
+  const content = currentContent();
+  code.innerHTML = activeTab === "config" ? highlightToml(content) : highlightPlain(content);
   const label = state.deployTarget === "ecsctl" ? "aws-sm"
     : state.deployTarget === "docker" ? "docker env" : "k8s secret";
   document.getElementById("secrets-tab-btn").textContent = `secrets (${label})`;
